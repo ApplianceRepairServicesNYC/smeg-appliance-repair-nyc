@@ -613,7 +613,10 @@
         <div class="container">
             <h1>Authorized Smeg Appliance Repair NYC</h1>
             <p>Premium Service • Factory-Trained Technicians • Serving Manhattan, Brooklyn, Queens and Bronx</p>
-            <button class="btn" id="heroCallNow">Schedule Your Repair</button>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" id="heroCallNow">Schedule Your Repair</button>
+                <button class="btn modal-trigger" data-modal="reviewsModal" style="background: transparent; border: 2px solid white;">★ Read Reviews</button>
+            </div>
         </div>
     </section>
     <section class="alt">
@@ -1572,6 +1575,61 @@
         </div>
     </div>
 
+    <!-- Reviews Modal -->
+    <div class="modal-card" id="reviewsModal">
+        <div class="modal-header">
+            <h2>Customer Reviews</h2>
+            <button class="modal-close" data-close="modal">&times;</button>
+        </div>
+        <div class="modal-content">
+            <!-- Elfsight Google Reviews Widget - loaded on demand -->
+            <div id="elfsightContainer">
+                <div class="elfsight-app-2942fb52-4463-41bc-bc83-d831b9da6f0e"></div>
+            </div>
+            <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #333;">
+                <button id="writeReviewBtn" style="background: linear-gradient(45deg, #c41e3a, #a01830); color: white; border: none; padding: 14px 35px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s;">Write Your Review</button>
+            </div>
+            <p style="margin-bottom: 20px;"></p>
+        </div>
+    </div>
+
+    <!-- Write Review Form Modal -->
+    <div class="modal-card" id="writeReviewModal" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2>Write a Review</h2>
+            <button class="modal-close" data-close="modal">&times;</button>
+        </div>
+        <div class="modal-content">
+            <form id="reviewForm">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Your Name *</label>
+                    <input type="text" id="reviewName" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Your Rating *</label>
+                    <div id="starRating" style="display: flex; gap: 8px; font-size: 32px; cursor: pointer; -webkit-user-select: none; user-select: none;">
+                        <span class="star" data-rating="1" tabindex="-1" style="-webkit-user-select: none; user-select: none;">☆</span>
+                        <span class="star" data-rating="2" tabindex="-1" style="-webkit-user-select: none; user-select: none;">☆</span>
+                        <span class="star" data-rating="3" tabindex="-1" style="-webkit-user-select: none; user-select: none;">☆</span>
+                        <span class="star" data-rating="4" tabindex="-1" style="-webkit-user-select: none; user-select: none;">☆</span>
+                        <span class="star" data-rating="5" tabindex="-1" style="-webkit-user-select: none; user-select: none;">☆</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" value="0">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Your Review *</label>
+                    <textarea id="reviewText" required rows="5" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; resize: vertical; box-sizing: border-box;" placeholder="Tell us about your experience..."></textarea>
+                </div>
+                <button type="submit" style="width: 100%; background: linear-gradient(45deg, #c41e3a, #a01830); color: white; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s;">Submit Review</button>
+            </form>
+            <div id="reviewThankYou" style="display: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">✓</div>
+                <h3 style="color: #1a1a2e; margin-bottom: 15px;">Thank You for Your Review!</h3>
+                <p style="color: #666; font-size: 16px;">Your review will be posted within 24 hours.</p>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-main">
             <div class="footer-grid">
@@ -1612,6 +1670,7 @@
                     <a href="#cf-schedule-container" class="scroll-link">Schedule Service</a>
                     <a href="#" class="modal-trigger" data-modal="privacyModal">Privacy Policy</a>
                     <a href="#" class="modal-trigger" data-modal="termsModal">Terms of Service</a>
+                    <a href="#" class="modal-trigger" data-modal="reviewsModal">Reviews</a>
                 </div>
                 <p>© 2025 Smeg Appliance Repair NYC. All Rights Reserved.</p>
                 <p>Licensed and Insured • Factory Certified Technicians • Same-Day Service Available</p>
@@ -1834,6 +1893,8 @@
             var modalOverlay = document.getElementById('modalOverlay');
             var privacyModal = document.getElementById('privacyModal');
             var termsModal = document.getElementById('termsModal');
+            var reviewsModal = document.getElementById('reviewsModal');
+            var writeReviewModal = document.getElementById('writeReviewModal');
             
             function openModal(modalId) {
                 modalOverlay.classList.add('active');
@@ -1845,7 +1906,20 @@
                 modalOverlay.classList.remove('active');
                 privacyModal.classList.remove('active');
                 termsModal.classList.remove('active');
+                if (reviewsModal) reviewsModal.classList.remove('active');
+                if (writeReviewModal) writeReviewModal.classList.remove('active');
                 document.body.style.overflow = '';
+            }
+            
+            // Lazy load Elfsight widget
+            var elfsightLoaded = false;
+            function loadElfsightWidget() {
+                if (elfsightLoaded) return;
+                elfsightLoaded = true;
+                var script = document.createElement('script');
+                script.src = 'https://static.elfsight.com/platform/platform.js';
+                script.async = true;
+                document.head.appendChild(script);
             }
             
             // Modal triggers
@@ -1853,9 +1927,78 @@
                 trigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     var modalId = this.getAttribute('data-modal');
+                    // Load Elfsight widget only when reviews modal is opened
+                    if (modalId === 'reviewsModal') {
+                        loadElfsightWidget();
+                    }
                     openModal(modalId);
                 });
             });
+            
+            // Write Review Button
+            var writeReviewBtn = document.getElementById('writeReviewBtn');
+            if (writeReviewBtn) {
+                writeReviewBtn.addEventListener('click', function() {
+                    reviewsModal.classList.remove('active');
+                    openModal('writeReviewModal');
+                });
+            }
+            
+            // Star Rating
+            var stars = document.querySelectorAll('#starRating .star');
+            var ratingInput = document.getElementById('reviewRating');
+            stars.forEach(function(star) {
+                star.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var rating = this.getAttribute('data-rating');
+                    ratingInput.value = rating;
+                    stars.forEach(function(s, index) {
+                        s.textContent = index < rating ? '★' : '☆';
+                        s.style.color = index < rating ? '#FFD700' : '#333';
+                    });
+                    document.activeElement.blur();
+                });
+                star.addEventListener('mouseover', function() {
+                    var rating = this.getAttribute('data-rating');
+                    stars.forEach(function(s, index) {
+                        s.textContent = index < rating ? '★' : '☆';
+                        s.style.color = index < rating ? '#FFD700' : '#333';
+                    });
+                });
+                star.addEventListener('mouseout', function() {
+                    var currentRating = ratingInput.value;
+                    stars.forEach(function(s, index) {
+                        s.textContent = index < currentRating ? '★' : '☆';
+                        s.style.color = index < currentRating ? '#FFD700' : '#333';
+                    });
+                });
+            });
+            
+            // Review Form Submission
+            var reviewForm = document.getElementById('reviewForm');
+            var reviewThankYou = document.getElementById('reviewThankYou');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (ratingInput.value === '0') {
+                        alert('Please select a rating');
+                        return;
+                    }
+                    reviewForm.style.display = 'none';
+                    reviewThankYou.style.display = 'block';
+                    setTimeout(function() {
+                        closeAllModals();
+                        reviewForm.style.display = 'block';
+                        reviewThankYou.style.display = 'none';
+                        reviewForm.reset();
+                        ratingInput.value = '0';
+                        stars.forEach(function(s) {
+                            s.textContent = '☆';
+                            s.style.color = '#333';
+                        });
+                    }, 3000);
+                });
+            }
             
             // Close modal buttons
             document.querySelectorAll('.modal-close').forEach(function(btn) {
